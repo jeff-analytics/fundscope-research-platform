@@ -1,0 +1,44 @@
+FundScope Web V9.2.2 Release Validation
+Date: 2026-08-26
+
+User-visible fixes
+- Similarity Breakdown "查看基金" now updates route + fund state on the same Fund Research page.
+- Research Explorer object selector moved into a dedicated horizontal research-mode bar; labels are nowrap and responsive.
+- Market Pulse asset allocation now returns the complete locally collected quarterly history. The chart starts with the full timeline and adds dynamic inside/slider zoom only when the history is long.
+- Research scatter plots use contained grids, centered y-axis titles and larger name gaps to avoid clipping under panel headers.
+- Institutional Consensus core data and historical trajectories are separated. A slow first local cohort query no longer needs to block the entire page.
+- Local Institutional Consensus has progressive loading: a fast market snapshot can render while one background single-flight job prepares the exact comparable Fund Master cohort, then the page auto-refreshes.
+- Institutional Consensus retry explicitly invalidates the request cache and triggers a new request.
+
+Performance / resilience
+- Fund Explorer local cross-section remains on the vectorized V9.2.1 batch path.
+- Heavy Explorer and consensus computations use in-process cache/single-flight protection.
+- Consensus result and canonical Top-10 snapshot cache keys include the active database path and data revision.
+- Smart Money historical coverage is loaded independently and only for the displayed securities/window.
+- Startup local-data check remains a lightweight EXISTS query.
+- Frontend stale-while-revalidate navigation remains enabled for research pages.
+
+Synthetic regression checks
+- Existing V9.2.1 Explorer benchmark: 1,500 Fund Masters, 2 report periods, ~75,000 holdings; cold Fund Explorer path ~2.2 s after vectorization versus ~22.5 s on the older path.
+- V9.2.2 progressive consensus smoke: 500 Fund Masters, 3 periods, ~15,000 holdings. Initial progressive response returned a labelled market snapshot in ~0.26 s; exact Top-10 comparable cohort was available on the next poll and then returned from cache in ~0.003 s.
+These are algorithm/regression measurements and are not a guarantee for every 1GB local database or SSD.
+
+Backend validation
+- python -m pytest from repository root: 51 passed
+- python -m compileall backend scripts: passed
+- Demo API smoke: health, Smart Money, Smart Money history and Fund Explorer returned HTTP 200
+
+Frontend validation
+- TypeScript/TSX source syntax: 45 files, 0 parse diagnostics using TypeScript 5.9 parser
+- Direct npm dependency versions are pinned exactly
+- Node.js engine: >=22 <23
+- Windows launcher checks Node 22 before npm install
+- GitHub Actions is configured for frontend tests and production build
+
+Environment limitation
+- This build container cannot complete npm dependency installation from registry.npmjs.org, so a local npm test / Vite production build and package-lock generation cannot be completed here.
+- No package-lock.json is fabricated. A normal networked npm install / Windows startup will install the pinned dependency set; CI then runs npm test and npm run build.
+
+Release hygiene
+- node_modules, .venv, databases, caches, logs, pytest artifacts and Python bytecode are excluded from the release ZIP
+- existing user database remains at C:\Users\<user>\.fundscope\fundscope.db and does not need to be recollected
