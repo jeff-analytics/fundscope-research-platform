@@ -10,8 +10,8 @@ describe('quarterly disclosure comparability', () => {
   })
 
   it('uses top10 on both sides when disclosure scope differs', () => {
-    const previous = Array.from({ length: 15 }, (_, i) => ({ stock_code: String(i), weight_pct: 15 - i }))
-    const current = Array.from({ length: 15 }, (_, i) => ({ stock_code: String(i), weight_pct: 15 - i }))
+    const previous = Array.from({ length: 15 }, (_, i) => ({ quarter: '2026Q2', stock_code: String(i), weight_pct: 15 - i }))
+    const current = Array.from({ length: 15 }, (_, i) => ({ quarter: '2026Q3', stock_code: String(i), weight_pct: 15 - i }))
     const result = comparableSnapshots(previous, current, '2026Q2', '2026Q3')
     expect(result.oldRows).toHaveLength(10)
     expect(result.newRows).toHaveLength(10)
